@@ -3,8 +3,8 @@ but ReplicaSet is the newer and more powerful version. Here is a clear breakdown
 
 # Purpose (Same for Both)
 Feature	Description
-Primary Function	Ensure a fixed number of pod replicas are running.
-Self-Healing	Automatically replaces failed or terminated pods.
+Primary Function	             Ensure a fixed number of pod replicas are running.
+Self-Healing	                 Automatically replaces failed or terminated pods.
 
 # ReplicationController vs ReplicaSet
 Feature	                  ReplicationController (RC)	                        ReplicaSet (RS)
