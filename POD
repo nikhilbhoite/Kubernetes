@@ -57,3 +57,55 @@ kubectl run my-clean-pod \
   --requests="cpu=100m,memory=128Mi" \
   --limits="cpu=200m,memory=256Mi"
 
+#################################################################################################################################################################################################
+When you create a Pod imperatively using kubectl run, it’s directly managed by the Kubernetes API — not by a controller like a Deployment. 
+That means you can’t "edit and redeploy" it easily, because Pods are not meant to be modified significantly once created.
+
+That said, you have 3 practical ways to change or update such a Pod:
+
+### 1. Delete and Recreate the Pod (Recommended for Most Cases)
+
+Step 1: Export the Pod YAML:
+kubectl get pod <pod-name> -o yaml > pod.yaml
+
+Step 2: Edit the YAML file:
+nano pod.yaml   # or use your preferred editor
+Make your changes (e.g., image, env vars, resources, etc.)
+
+IMP!!! Make sure to remove the following fields before applying:
+
+metadata:
+  creationTimestamp:
+  resourceVersion:
+  uid:
+status:
+
+Step 3: Delete the old pod:
+
+kubectl delete pod <pod-name>
+Step 4: Apply the updated YAML:
+
+kubectl apply -f pod.
+
+### 2. Edit the Pod In-Place (Not All Fields Allowed)
+You can try:
+
+kubectl edit pod <pod-name>
+This opens the pod spec in your default editor. 
+You can change some fields like labels or annotations, but you cannot edit fields like the image, env vars, or resource requests/limits — doing so will result in an error.
+
+### 3. Generate New Pod with Changes Using kubectl run Again
+If you initially used:
+
+kubectl run mypod --image=nginx --restart=Never
+To update it, simply:
+
+kubectl delete pod mypod
+kubectl run mypod --image=nginx:1.25 --restart=Never --env="MODE=debug"
+
+
+### Summary
+Approach	Use Case
+kubectl edit	Minor metadata changes
+Delete & apply YAML	Any real change (image, env, resources)
+Re-run kubectl run	Quick recreate with updated options
