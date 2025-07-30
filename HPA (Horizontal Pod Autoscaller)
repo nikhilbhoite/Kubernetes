@@ -1,0 +1,61 @@
+Horizontal Pod Autoscaler (HPA) automatically scales the number of pods in a deployment, replication controller, 
+or replica set based on observed CPU utilization (or other custom metrics like memory, requests per second, etc.).
+
+So, if your app is under heavy load, HPA can add more pods to handle traffic. When the load drops, it removes pods to save resources.
+
+# How HPA Works
+Controller: The HPA controller checks metrics from the Kubernetes Metrics Server.
+Metrics: Default is CPU utilization, but you can configure custom metrics.
+Scaling: If the observed metrics exceed the target, Kubernetes will increase pod count; if they're below, it will decrease it.
+
+# Prerequisites
+Kubernetes cluster running
+Metrics Server installed
+
+# Let say below is your manifest file
+nano deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpu-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cpu-demo
+  template:
+    metadata:
+      labels:
+        app: cpu-demo
+    spec:
+      containers:
+      - name: cpu-demo
+        image: vish/stress
+        args:
+        - -cpus
+        - "2"
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: "0.5"
+
+
+now if i you want to scale pods horizontaly in node
+
+kubectl apply -f deployment.yaml
+
+kubectl autoscale deployment cpu-demo --cpu-percent=50 --min=1 --max=10
+
+kubectl get hpa
+
+## Simulate Load
+Run a pod to stress CPU:
+kubectl run -i --tty load-generator --rm \
+  --image=busybox /bin/sh
+
+# Inside the pod:
+while true; do wget -q -O- http://cpu-demo; done
+
+
