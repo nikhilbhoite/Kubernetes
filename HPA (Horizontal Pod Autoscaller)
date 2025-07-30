@@ -58,4 +58,153 @@ kubectl run -i --tty load-generator --rm \
 # Inside the pod:
 while true; do wget -q -O- http://cpu-demo; done
 
+##########################################################################################################################################################################################
+
+if you want to define HPA declaratively (i.e., using YAML), that’s the right approach for GitOps, version control, or production setups.
+
+Here’s a declarative YAML example of a Horizontal Pod Autoscaler (HPA) targeting CPU usage:
+
+# Declarative HPA YAML (CPU-based)
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cpu-demo
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cpu-demo
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+#
+ Breakdown
+scaleTargetRef: Targets the Deployment named cpu-demo.
+
+minReplicas / maxReplicas: Boundaries for auto-scaling.
+
+metrics: Uses CPU utilization. You can also use memory or custom metrics.
+
+autoscaling/v2: Use v2 or v2beta2 if you need more advanced features (like scaling policies).
+
+# Apply it
+Save the YAML to hpa.yaml.
+
+Run:
+kubectl apply -f hpa.yaml
+
+Check status:
+
+kubectl get hpa cpu-demo
+kubectl describe hpa cpu-demo
+
+# Optional: Use Memory-Based Autoscaling
+If you'd like to scale based on memory instead:
+
+metrics:
+- type: Resource
+  resource:
+    name: memory
+    target:
+      type: Utilization
+      averageUtilization: 70
+
+
+
+if you don’t want to use CPU utilization and want to select another metric type for autoscaling, Kubernetes supports three main metric types in autoscaling/v2:
+
+# Metric Types for HPA in Kubernetes
+Resource Metrics (built-in: CPU, memory)
+
+Pods Metrics (custom app-level metrics like QPS)
+
+External Metrics (from outside the cluster, e.g., cloud queue depth)
+
+Object Metrics (based on a Kubernetes object’s metric, like Ingress request rate)
+
+# 1. Resource Metrics (Default)
+Example using memory instead of CPU:
+
+metrics:
+- type: Resource
+  resource:
+    name: memory
+    target:
+      type: Utilization
+      averageUtilization: 70
+
+# 2. Pods Metrics (Custom metrics per pod)
+Requires Prometheus Adapter or custom metrics API.
+
+Example: scaling based on requests_per_second exposed by your app:
+
+
+metrics:
+- type: Pods
+  pods:
+    metric:
+      name: requests_per_second
+    target:
+      type: AverageValue
+      averageValue: "100"
+# You'll need:
+
+A metrics endpoint exposing this metric
+
+Prometheus + Prometheus Adapter configured
+
+# 3. External Metrics (Outside the cluster)
+Example: scale based on SQS queue length or cloud monitoring:
+
+metrics:
+- type: External
+  external:
+    metric:
+      name: queue_messages_ready
+      selector:
+        matchLabels:
+          queue: my-queue
+    target:
+      type: Value
+      value: "30"
+
+# Requires:
+
+An external metrics adapter (e.g., Prometheus Adapter or custom)
+
+Your external source must expose metrics to Kubernetes
+
+# 4. Object Metrics (Specific Kubernetes object metrics)
+Example: scale based on request rate on an Ingress object:
+
+metrics:
+- type: Object
+  object:
+    describedObject:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      name: my-ingress
+    metric:
+      name: requests_per_second
+    target:
+      type: Value
+      value: "100"
+Again, this requires a metric adapter (like Prometheus Adapter) and properly exposed metrics.
+
+# Summary
+Type	         Built-in?               Adapter Required?            Example Use
+Resource           Yes                      No                      CPU, memory
+Pods               No                       Yes                     App-level QPS per pod
+External           No                       Yes                     Queue size, cloud metrics, etc.
+Object             No                       Yes                     Ingress requests, object-level metrics
+
+Would you like to walk through setting up custom metrics with Prometheus Adapter, or try a concrete example with Pods/External metrics?
+
 
