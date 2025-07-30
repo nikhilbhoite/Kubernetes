@@ -1,0 +1,46 @@
+# pod-related commands commonly used to manage and interact with pods in Kubernetes:
+
+# View / List Pods
+
+kubectl get pods                                   # List all pods in the current namespace
+kubectl get pods -n <namespace>                    # List pods in a specific namespace
+kubectl get pod <pod-name>                         # View details for a single pod
+kubectl describe pod <pod-name>                    # Get detailed info (events, status, containers, etc.)
+
+# Pod Logs
+
+kubectl logs <pod-name>                            # Get logs of a pod
+kubectl logs <pod-name> -c <container-name>        # Logs from a specific container
+kubectl logs -f <pod-name>                         # Follow logs (live tail)
+kubectl logs --previous <pod-name>                 # View logs from a crashed container
+
+# Execute Commands in Pods
+
+kubectl exec -it <pod-name> -- /bin/bash           # Open a bash shell in the container
+kubectl exec -it <pod-name> -c <container> -- sh   # Shell into a specific container
+kubectl exec <pod-name> -- <command>               # Run a command inside the pod
+
+# Create / Delete Pods
+
+kubectl run <pod-name> --image=<image>             # Create a pod (basic testing)
+kubectl delete pod <pod-name>                      # Delete a specific pod
+kubectl delete pods --all                          # Delete all pods in the current namespace
+
+
+# Pod Lifecycle / Management
+
+kubectl get pod <pod-name> -o yaml                 # Output pod definition in YAML
+kubectl replace -f <pod-file>.yaml                 # Replace a pod from a YAML file
+kubectl apply -f <pod-file>.yaml                   # Apply changes (if managed by controller)
+kubectl rollout restart deployment <name>          # Restart pods managed by a deployment
+
+# Debugging / Testing
+
+kubectl get events                                 # View events (see pod issues)
+kubectl top pod <pod-name>                         # View resource usage (if metrics-server installed)
+kubectl port-forward pod/<pod-name> <local>:<remote>  # Port forward to access a pod locally
+
+# Namespace Handling
+
+kubectl get pods --all-namespaces                  # List all pods in all namespaces
+kubectl config set-context --current --namespace=<ns>  # Set default namespace for kubectl
