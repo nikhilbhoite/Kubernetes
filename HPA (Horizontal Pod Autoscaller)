@@ -42,7 +42,7 @@ spec:
             cpu: "0.5"
 
 
-now if i you want to scale pods horizontaly in node
+now if i you want to scale pods horizontaly in node ***Imperatively***
 
 kubectl apply -f deployment.yaml
 
