@@ -16,6 +16,8 @@ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/late
 
 kubectl get pods -n kube-system | grep metrics-server
 
+# check deployment status of metrics-server
+
 kubectl top nodes
 kubectl top pods --all-namespaces
 
@@ -56,7 +58,10 @@ spec:
 
 # hit below command to check 
 
- kubectl top nodes      
+ kubectl top nodes    
+
+#if it works we are ok to work on HPA Hosrizontal Pod Autoscaller
+  
 
 
 
