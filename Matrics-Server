@@ -1,0 +1,63 @@
+### The Metrics Server is required in Kubernetes for resource monitoring and autoscaling, as it collects metrics like CPU and memory usage from Kubelets on each node.
+
+# Why You Need It
+# The Metrics Server is essential for:
+
+# kubectl top nodes/pods commands.
+# Kubernetes Horizontal Pod Autoscaler (HPA).
+# Cluster monitoring and autoscaling features.
+
+## How to install
+
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+# It downloads and applies the components.yaml file for the latest release of the metrics-server.
+# This YAML file defines the Deployment, ServiceAccount, ClusterRole, APIService, etc., needed to run the metrics server.
+
+kubectl get pods -n kube-system | grep metrics-server
+
+kubectl top nodes
+kubectl top pods --all-namespaces
+
+# Common Issue: "No metrics available"
+
+# add this file in yaml file using 
+
+kubectl edit deployment metrics-server -n kube-system
+
+
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: metrics-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        k8s-app: metrics-server
+    spec:
+      containers:
+      - args:
+        - --cert-dir=/tmp
+        - --secure-port=10250
+        - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+        - --kubelet-use-node-status-port
+        - --metric-resolution=15s
+
+        - --kubelet-insecure-tls                            ##### Add this line to work matrics-server smoothly
+
+# hit below command to check 
+
+ kubectl top nodes      
+
+
+
+
