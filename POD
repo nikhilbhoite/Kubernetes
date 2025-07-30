@@ -44,3 +44,16 @@ kubectl port-forward pod/<pod-name> <local>:<remote>  # Port forward to access a
 
 kubectl get pods --all-namespaces                  # List all pods in all namespaces
 kubectl config set-context --current --namespace=<ns>  # Set default namespace for kubectl
+
+
+
+Example of Imerative way to create pod
+kubectl run my-clean-pod \
+  --image=nginx:1.25 \
+  --restart=Never \
+  --port=80 \
+  --env="ENV=prod" \
+  --labels="app=nginx,tier=frontend" \
+  --requests="cpu=100m,memory=128Mi" \
+  --limits="cpu=200m,memory=256Mi"
+
